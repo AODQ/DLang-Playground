@@ -32,11 +32,11 @@ float Uniform ( ) {
 }
 
 void Discard ( ref Data data ) {
-  foreach ( i; 0 .. 3 ) {
+  foreach ( i; 1 .. 10 ) {
     int idx = cast(int)uniform(0, Amt);
     // completely randomize one
     data.o[idx] = float3(uniform(-1.0f,1.0f),uniform(-1.0f,1.0f),
-                         uniform(0.01f,0.3f));
+                         uniform(0.05f,0.3f));
     data.c[idx] = float4(uniform(0.0f, 1.0f), uniform(0.0f, 1.0f),
                         uniform(0.0f, 1.0f), uniform(0.1f, 1.0f));
   }
@@ -44,24 +44,28 @@ void Discard ( ref Data data ) {
 
 void Randomize ( ref Data data, float score ) {
   // discard
-  if ( discardcount > 5 && uniform(0.0f, 1.0f) > 0.5f ) {
+  if ( discardcount > 4 && uniform(0.0f, 1.0f) > 0.5f ) {
     Discard(data);
     return;
   }
-  int amt = 20;
-  if ( discardcount > 1  ) amt = 10;
-  if ( discardcount > 5  ) amt = 5;
-  if ( discardcount > 10 ) amt = 1;
+  int amt = uniform(1, 10);
+  if ( discardcount > 3 ) amt = 1;
   // select random circle & randomize a bit of it
-  foreach ( i; 0 .. uniform(1, 1+amt) ) {
+  foreach ( i; 0 .. amt ) {
     int idx = cast(int)uniform(0, Amt);
-    foreach ( ref v; data.o[idx].vector[0..3] ) {
-      v = Clamp(v + Uniform()*0.51f, -1.0f, 1.0f);
+    final switch ( uniform(0, 4) ) {
+      case 0: // origin
+        foreach ( ref v; data.o[idx].vector[0..3] ) {
+          v = Clamp(v + Uniform()*0.20f, -1.0f, 1.0f);
+        }
+      break;
+      case 1: // size
+        data.o[idx].z = Clamp(data.o[idx].z+Uniform()*0.4f, 0.055f, 0.600f);
+      break;
+      case 2: case 3: // colour
+        foreach ( ref c; data.c[idx].vector )
+          c = Clamp(c + Uniform()*1.0f, 0.0f, 1.0f);
     }
-    data.o[idx].z = Clamp(data.o[idx].z+Uniform()*0.11f, 0.015f, 0.300f);
-    foreach ( ref c; data.c[idx].vector )
-      c = Clamp(c + Uniform()*0.51f, 0.0f, 1.0f);
-    data.c[idx].w = Clamp(data.c[idx].w, 0.2f, 1.0f);
   }
 }
 
@@ -138,7 +142,7 @@ void main(string[] args) {
     glReadPixels(0, 0, render.window_width, render.window_height, GL_RGBA,
                  GL_UNSIGNED_BYTE, oimg.ptr);
     float ndif = Compute_Difference(img, oimg);
-    if ( ndif < diff ) {
+    if ( ndif <= diff ) {
       discardcount = 0;
       // postblit not working..?
       // data = gendata;
@@ -210,7 +214,7 @@ void Initialize ( int ww, int wh ) {
 
     void main ( ) {
       if ( length(frag_coord.xy) - 1.0f > 0.0f ) discard;
-      out_colour = frag_col*float4(float3(1.0f), 1.0f-length(frag_coord.xy));
+      out_colour = frag_col*float4(float3(1.0f), pow(1.0f-length(frag_coord.xy), 2.0f));
     }
   });
   float[] vertices = [

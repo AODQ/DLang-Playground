@@ -22,7 +22,7 @@ void Initialize ( int ww, int wh ) {
   glfwWindowHint(GLFW_REFRESH_RATE,  0                         );
   glfwSwapInterval(0);
 
-  window = glfwCreateWindow(window_width, window_height, "boids", null, null);
+  window = glfwCreateWindow(window_width, window_height, "GA test", null, null);
   glfwSwapInterval(0);
 
   glfwWindowHint(GLFW_FLOATING, GL_TRUE);
