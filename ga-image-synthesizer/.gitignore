@@ -1,0 +1,14 @@
+.dub
+docs.json
+__dummy.html
+docs/
+ga-image-synthesizer.so
+ga-image-synthesizer.dylib
+ga-image-synthesizer.dll
+ga-image-synthesizer.a
+ga-image-synthesizer.lib
+ga-image-synthesizer-test-*
+*.exe
+*.o
+*.obj
+*.lst
